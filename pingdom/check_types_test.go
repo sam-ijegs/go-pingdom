@@ -59,6 +59,8 @@ func TestHttpCheckPutParams(t *testing.T) {
 				"verify_certificate":       "true",
 				"ssl_down_days_before":     "10",
 				"sendnotificationwhendown": "3",
+				"ipv6":                     "false",
+				"custom_message":           "",
 			},
 		},
 		{
@@ -97,6 +99,8 @@ func TestHttpCheckPutParams(t *testing.T) {
 				"userids":                "123,456",
 				"teamids":                "789",
 				"responsetime_threshold": "2300",
+				"ipv6":                   "false",
+				"custom_message":         "",
 			},
 		},
 	}
@@ -148,6 +152,7 @@ func TestHttpCheckPostParams(t *testing.T) {
 		"responsetime_threshold": "2300",
 		"verify_certificate":     "true",
 		"ssl_down_days_before":   "10",
+		"ipv6":                   "false",
 	}
 
 	params := check.PostParams()
@@ -255,6 +260,7 @@ func TestTCPCheckPostParams(t *testing.T) {
 		"port":             "8080",
 		"stringtosend":     "Hello World",
 		"stringtoexpect":   "Hi there",
+		"ipv6":             "false",
 	}
 
 	params := check.PostParams()
@@ -311,6 +317,7 @@ func TestDNSCheckPutParams(t *testing.T) {
 				"userids":                  "123,456",
 				"teamids":                  "789",
 				"sendnotificationwhendown": "3",
+				"ipv6":                     "false",
 			},
 		},
 		{
@@ -334,6 +341,7 @@ func TestDNSCheckPutParams(t *testing.T) {
 				"probe_filters":    "",
 				"userids":          "",
 				"teamids":          "",
+				"ipv6":             "false",
 			},
 		},
 	}
@@ -368,6 +376,7 @@ func TestDNSCheckPostParams(t *testing.T) {
 		"integrationids":   "33333333,44444444",
 		"userids":          "123,456",
 		"teamids":          "789",
+		"ipv6":             "false",
 	}
 
 	params := check.PostParams()

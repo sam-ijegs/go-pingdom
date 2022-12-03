@@ -8,114 +8,121 @@ import (
 
 // HttpCheck represents a Pingdom HTTP check.
 type HttpCheck struct {
-	Name                     string            `json:"name"`
+	CustomMessage            string            `json:"custom_message,omitempty"`
+	Encryption               bool              `json:"encryption,omitempty"`
 	Hostname                 string            `json:"hostname,omitempty"`
-	Resolution               int               `json:"resolution,omitempty"`
-	Paused                   bool              `json:"paused,omitempty"`
-	SendNotificationWhenDown int               `json:"sendnotificationwhendown,omitempty"`
+	IPV6                     bool              `json:"ipv6,omitempty"`
+	IntegrationIds           []int             `json:"integrationids,omitempty"`
+	Name                     string            `json:"name"`
 	NotifyAgainEvery         int               `json:"notifyagainevery,omitempty"`
 	NotifyWhenBackup         bool              `json:"notifywhenbackup,omitempty"`
-	Url                      string            `json:"url,omitempty"`
-	Encryption               bool              `json:"encryption,omitempty"`
-	Port                     int               `json:"port,omitempty"`
-	Username                 string            `json:"username,omitempty"`
 	Password                 string            `json:"password,omitempty"`
+	Paused                   bool              `json:"paused,omitempty"`
+	Port                     int               `json:"port,omitempty"`
+	PostData                 string            `json:"postdata,omitempty"`
+	ProbeFilters             string            `json:"probe_filters,omitempty"`
+	RequestHeaders           map[string]string `json:"requestheaders,omitempty"`
+	Resolution               int               `json:"resolution,omitempty"`
+	ResponseTimeThreshold    int               `json:"responsetime_threshold,omitempty"`
+	SSLDownDaysBefore        *int              `json:"ssl_down_days_before,omitempty"`
+	SendNotificationWhenDown int               `json:"sendnotificationwhendown,omitempty"`
 	ShouldContain            string            `json:"shouldcontain,omitempty"`
 	ShouldNotContain         string            `json:"shouldnotcontain,omitempty"`
-	PostData                 string            `json:"postdata,omitempty"`
-	RequestHeaders           map[string]string `json:"requestheaders,omitempty"`
-	IntegrationIds           []int             `json:"integrationids,omitempty"`
-	ResponseTimeThreshold    int               `json:"responsetime_threshold,omitempty"`
 	Tags                     string            `json:"tags,omitempty"`
-	ProbeFilters             string            `json:"probe_filters,omitempty"`
-	UserIds                  []int             `json:"userids,omitempty"`
 	TeamIds                  []int             `json:"teamids,omitempty"`
+	Url                      string            `json:"url,omitempty"`
+	UserIds                  []int             `json:"userids,omitempty"`
+	Username                 string            `json:"username,omitempty"`
 	VerifyCertificate        *bool             `json:"verify_certificate,omitempty"`
-	SSLDownDaysBefore        *int              `json:"ssl_down_days_before,omitempty"`
 }
 
 // PingCheck represents a Pingdom ping check.
 type PingCheck struct {
-	Name                     string `json:"name"`
 	Hostname                 string `json:"hostname,omitempty"`
-	Resolution               int    `json:"resolution,omitempty"`
-	Paused                   bool   `json:"paused,omitempty"`
-	SendNotificationWhenDown int    `json:"sendnotificationwhendown,omitempty"`
+	IntegrationIds           []int  `json:"integrationids,omitempty"`
+	Name                     string `json:"name"`
 	NotifyAgainEvery         int    `json:"notifyagainevery,omitempty"`
 	NotifyWhenBackup         bool   `json:"notifywhenbackup,omitempty"`
-	IntegrationIds           []int  `json:"integrationids,omitempty"`
-	Tags                     string `json:"tags,omitempty"`
-	ResponseTimeThreshold    int    `json:"responsetime_threshold,omitempty"`
+	Paused                   bool   `json:"paused,omitempty"`
 	ProbeFilters             string `json:"probe_filters,omitempty"`
-	UserIds                  []int  `json:"userids,omitempty"`
+	Resolution               int    `json:"resolution,omitempty"`
+	ResponseTimeThreshold    int    `json:"responsetime_threshold,omitempty"`
+	SendNotificationWhenDown int    `json:"sendnotificationwhendown,omitempty"`
+	Tags                     string `json:"tags,omitempty"`
 	TeamIds                  []int  `json:"teamids,omitempty"`
+	UserIds                  []int  `json:"userids,omitempty"`
 }
 
 // TCPCheck represents a Pingdom TCP check.
 type TCPCheck struct {
-	Name                     string `json:"name"`
+	CustomMessage            string `json:"custom_message,omitempty"`
 	Hostname                 string `json:"hostname,omitempty"`
-	Resolution               int    `json:"resolution,omitempty"`
-	Paused                   bool   `json:"paused,omitempty"`
-	SendNotificationWhenDown int    `json:"sendnotificationwhendown,omitempty"`
+	IPV6                     bool   `json:"ipv6,omitempty"`
+	IntegrationIds           []int  `json:"integrationids,omitempty"`
+	Name                     string `json:"name"`
 	NotifyAgainEvery         int    `json:"notifyagainevery,omitempty"`
 	NotifyWhenBackup         bool   `json:"notifywhenbackup,omitempty"`
-	IntegrationIds           []int  `json:"integrationids,omitempty"`
-	Tags                     string `json:"tags,omitempty"`
-	ProbeFilters             string `json:"probe_filters,omitempty"`
-	UserIds                  []int  `json:"userids,omitempty"`
-	TeamIds                  []int  `json:"teamids,omitempty"`
+	Paused                   bool   `json:"paused,omitempty"`
 	Port                     int    `json:"port"`
-	StringToSend             string `json:"stringtosend,omitempty"`
+	ProbeFilters             string `json:"probe_filters,omitempty"`
+	Resolution               int    `json:"resolution,omitempty"`
+	SendNotificationWhenDown int    `json:"sendnotificationwhendown,omitempty"`
 	StringToExpect           string `json:"stringtoexpect,omitempty"`
+	StringToSend             string `json:"stringtosend,omitempty"`
+	Tags                     string `json:"tags,omitempty"`
+	TeamIds                  []int  `json:"teamids,omitempty"`
+	UserIds                  []int  `json:"userids,omitempty"`
 }
 
 // DNSCheck represents a Pingdom DNS check.
 type DNSCheck struct {
-	Name                     string `json:"name"`
-	Hostname                 string `json:"hostname,omitempty"`
 	ExpectedIP               string `json:"expectedip,omitempty"`
+	Hostname                 string `json:"hostname,omitempty"`
+	IPV6                     bool   `json:"ipv6,omitempty"`
+	IntegrationIds           []int  `json:"integrationids,omitempty"`
+	Name                     string `json:"name"`
 	NameServer               string `json:"nameserver,omitempty"`
-	Resolution               int    `json:"resolution,omitempty"`
-	Paused                   bool   `json:"paused,omitempty"`
-	SendNotificationWhenDown int    `json:"sendnotificationwhendown,omitempty"`
 	NotifyAgainEvery         int    `json:"notifyagainevery,omitempty"`
 	NotifyWhenBackup         bool   `json:"notifywhenbackup,omitempty"`
-	IntegrationIds           []int  `json:"integrationids,omitempty"`
-	Tags                     string `json:"tags,omitempty"`
+	Paused                   bool   `json:"paused,omitempty"`
 	ProbeFilters             string `json:"probe_filters,omitempty"`
-	UserIds                  []int  `json:"userids,omitempty"`
+	Resolution               int    `json:"resolution,omitempty"`
+	SendNotificationWhenDown int    `json:"sendnotificationwhendown,omitempty"`
+	Tags                     string `json:"tags,omitempty"`
 	TeamIds                  []int  `json:"teamids,omitempty"`
+	UserIds                  []int  `json:"userids,omitempty"`
 }
 
 // SummaryPerformanceRequest is the API request to Pingdom for a SummaryPerformance.
 type SummaryPerformanceRequest struct {
-	Id            int
 	From          int
-	To            int
-	Resolution    string
+	Id            int
 	IncludeUptime bool
-	Probes        string
 	Order         string
+	Probes        string
+	Resolution    string
+	To            int
 }
 
 // PutParams returns a map of parameters for an HttpCheck that can be sent along
 // with an HTTP PUT request.
 func (ck *HttpCheck) PutParams() map[string]string {
 	m := map[string]string{
-		"name":             ck.Name,
+		"custom_message":   ck.CustomMessage,
+		"encryption":       strconv.FormatBool(ck.Encryption),
 		"host":             ck.Hostname,
-		"paused":           strconv.FormatBool(ck.Paused),
+		"integrationids":   intListToCDString(ck.IntegrationIds),
+		"ipv6":             strconv.FormatBool(ck.IPV6),
+		"name":             ck.Name,
 		"notifyagainevery": strconv.Itoa(ck.NotifyAgainEvery),
 		"notifywhenbackup": strconv.FormatBool(ck.NotifyWhenBackup),
-		"url":              ck.Url,
-		"encryption":       strconv.FormatBool(ck.Encryption),
+		"paused":           strconv.FormatBool(ck.Paused),
 		"postdata":         ck.PostData,
-		"integrationids":   intListToCDString(ck.IntegrationIds),
-		"tags":             ck.Tags,
 		"probe_filters":    ck.ProbeFilters,
-		"userids":          intListToCDString(ck.UserIds),
+		"tags":             ck.Tags,
 		"teamids":          intListToCDString(ck.TeamIds),
+		"url":              ck.Url,
+		"userids":          intListToCDString(ck.UserIds),
 	}
 
 	if ck.Resolution != 0 {
@@ -207,15 +214,15 @@ func (ck *HttpCheck) Valid() error {
 // with an HTTP PUT request.
 func (ck *PingCheck) PutParams() map[string]string {
 	m := map[string]string{
-		"name":             ck.Name,
 		"host":             ck.Hostname,
-		"paused":           strconv.FormatBool(ck.Paused),
+		"integrationids":   intListToCDString(ck.IntegrationIds),
+		"name":             ck.Name,
 		"notifyagainevery": strconv.Itoa(ck.NotifyAgainEvery),
 		"notifywhenbackup": strconv.FormatBool(ck.NotifyWhenBackup),
-		"integrationids":   intListToCDString(ck.IntegrationIds),
+		"paused":           strconv.FormatBool(ck.Paused),
 		"probe_filters":    ck.ProbeFilters,
-		"userids":          intListToCDString(ck.UserIds),
 		"teamids":          intListToCDString(ck.TeamIds),
+		"userids":          intListToCDString(ck.UserIds),
 	}
 
 	if ck.Resolution != 0 {
@@ -262,17 +269,19 @@ func (ck *PingCheck) Valid() error {
 // with an HTTP PUT request.
 func (ck *TCPCheck) PutParams() map[string]string {
 	m := map[string]string{
-		"name":             ck.Name,
+		"custom_message":   ck.CustomMessage,
 		"host":             ck.Hostname,
-		"paused":           strconv.FormatBool(ck.Paused),
+		"integrationids":   intListToCDString(ck.IntegrationIds),
+		"ipv6":             strconv.FormatBool(ck.IPV6),
+		"name":             ck.Name,
 		"notifyagainevery": strconv.Itoa(ck.NotifyAgainEvery),
 		"notifywhenbackup": strconv.FormatBool(ck.NotifyWhenBackup),
-		"integrationids":   intListToCDString(ck.IntegrationIds),
+		"paused":           strconv.FormatBool(ck.Paused),
+		"port":             strconv.Itoa(ck.Port),
 		"probe_filters":    ck.ProbeFilters,
 		"tags":             ck.Tags,
-		"userids":          intListToCDString(ck.UserIds),
 		"teamids":          intListToCDString(ck.TeamIds),
-		"port":             strconv.Itoa(ck.Port),
+		"userids":          intListToCDString(ck.UserIds),
 	}
 
 	if ck.Resolution != 0 {
@@ -327,18 +336,19 @@ func (ck *TCPCheck) Valid() error {
 // with an HTTP PUT request.
 func (ck *DNSCheck) PutParams() map[string]string {
 	m := map[string]string{
-		"name":             ck.Name,
-		"host":             ck.Hostname,
 		"expectedip":       ck.ExpectedIP,
+		"host":             ck.Hostname,
+		"integrationids":   intListToCDString(ck.IntegrationIds),
+		"ipv6":             strconv.FormatBool(ck.IPV6),
+		"name":             ck.Name,
 		"nameserver":       ck.NameServer,
-		"paused":           strconv.FormatBool(ck.Paused),
 		"notifyagainevery": strconv.Itoa(ck.NotifyAgainEvery),
 		"notifywhenbackup": strconv.FormatBool(ck.NotifyWhenBackup),
-		"integrationids":   intListToCDString(ck.IntegrationIds),
+		"paused":           strconv.FormatBool(ck.Paused),
 		"probe_filters":    ck.ProbeFilters,
 		"tags":             ck.Tags,
-		"userids":          intListToCDString(ck.UserIds),
 		"teamids":          intListToCDString(ck.TeamIds),
+		"userids":          intListToCDString(ck.UserIds),
 	}
 
 	if ck.Resolution != 0 {
