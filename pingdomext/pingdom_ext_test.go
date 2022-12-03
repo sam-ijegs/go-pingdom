@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nordcloud/go-pingdom/pingdom"
+	"github.com/DrFaust92/go-pingdom/pingdom"
 	"github.com/stretchr/testify/assert"
 )
 
