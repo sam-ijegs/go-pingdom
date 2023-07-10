@@ -66,6 +66,7 @@ type TCPCheck struct {
 	Port                     int    `json:"port"`
 	ProbeFilters             string `json:"probe_filters,omitempty"`
 	Resolution               int    `json:"resolution,omitempty"`
+	ResponseTimeThreshold    int    `json:"responsetime_threshold,omitempty"`
 	SendNotificationWhenDown int    `json:"sendnotificationwhendown,omitempty"`
 	StringToExpect           string `json:"stringtoexpect,omitempty"`
 	StringToSend             string `json:"stringtosend,omitempty"`
@@ -286,6 +287,10 @@ func (ck *TCPCheck) PutParams() map[string]string {
 
 	if ck.Resolution != 0 {
 		m["resolution"] = strconv.Itoa(ck.Resolution)
+	}
+
+	if ck.ResponseTimeThreshold != 0 {
+		m["responsetime_threshold"] = strconv.Itoa(ck.ResponseTimeThreshold)
 	}
 
 	if ck.SendNotificationWhenDown != 0 {
