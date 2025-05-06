@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/mbarper/go-pingdom/pingdom"
+	"github.com/sam-ijegs/go-pingdom/pingdom"
 )
 
 type credentials struct {

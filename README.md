@@ -1,6 +1,8 @@
 # go-pingdom #
 
-[![Build Status](https://travis-ci.org/mbarper/go-pingdom.svg?branch=master)](https://travis-ci.org/mbarper/go-pingdom) [![Go Report Card](https://goreportcard.com/badge/github.com/mbarper/go-pingdom/pingdom)](https://goreportcard.com/report/github.com/mbarper/go-pingdom/pingdom) [![GoDoc](https://godoc.org/github.com/mbarper/go-pingdom/pingdom?status.svg)](https://godoc.org/github.com/mbarper/go-pingdom/pingdom)
+[![Build Status](https://travis-ci.org/sam-ijegs/go-pingdom.svg?branch=master)](https://travis-ci.org/sam-ijegs/go-pingdom) [![Go Report Card](https://goreportcard.com/badge/github.com/sam-ijegs/go-pingdom/pingdom)](https://goreportcard.com/report/github.com/sam-ijegs/go-pingdom/pingdom) [![GoDoc](https://godoc.org/github.com/sam-ijegs/go-pingdom/pingdom?status.svg)](https://godoc.org/github.com/sam-ijegs/go-pingdom/pingdom)
+
+This is an extension to the go library currently managed by @mbarper
 
 go-pingdom is a Go client library for the Pingdom API.
 
@@ -19,8 +21,18 @@ client, err := pingdom.NewClientWithConfig(pingdom.ClientConfig{
     APIToken: "pingdom_api_token",
 })
 ```
+You can also use the API Token Only authentication method:
 
+```go
+client, err := pingdom.NewClientWithConfig(pingdom.ClientConfig{
+    APITokenOnly: "pingdom_api_token_only",
+})
+```
+The library now supports two authentication methods that can be used independently or together:
+When both authentication methods are provided, APITokenOnly takes precedence. At least one authentication method must be provided, or the client initialization will return an error.
 Using a Pingdom client, you can access supported services.
+Using a Pingdom client, you can access supported services.
+
 
 You can override the timeout or other parameters by passing a custom http client:
 ```go
@@ -35,7 +47,13 @@ client, err := pingdom.NewClientWithConfig(pingdom.ClientConfig{
 The `APIToken` can also implicitly be provided by setting the environment variable `PINGDOM_API_TOKEN`:
 
 ```bash
+# Standard API Token
 export PINGDOM_API_TOKEN=pingdom_api_token
+
+
+# API Token Only
+export PINGDOM_API_TOKEN_ONLY=pingdom_api_token_only
+
 ./your_application
 ```
 

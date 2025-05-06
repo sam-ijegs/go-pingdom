@@ -16,23 +16,25 @@ const (
 
 // Client represents a client to the Pingdom API.
 type Client struct {
-	APIToken     string
-	BaseURL      *url.URL
-	client       *http.Client
-	Checks       *CheckService
-	Contacts     *ContactService
-	Maintenances *MaintenanceService
-	Occurrences  *OccurrenceService
-	Probes       *ProbeService
-	Teams        *TeamService
-	TMSCheck     *TMSCheckService
+	APIToken      string 
+	APITokenOnly  string 
+	BaseURL       *url.URL
+	client        *http.Client
+	Checks        *CheckService
+	Contacts      *ContactService
+	Maintenances  *MaintenanceService
+	Occurrences   *OccurrenceService
+	Probes        *ProbeService
+	Teams         *TeamService
+	TMSCheck      *TMSCheckService
 }
 
 // ClientConfig represents a configuration for a pingdom client.
 type ClientConfig struct {
-	APIToken   string
-	BaseURL    string
-	HTTPClient *http.Client
+	APIToken      string
+	APITokenOnly  string
+	BaseURL       string
+	HTTPClient    *http.Client
 }
 
 // NewClientWithConfig returns a Pingdom client.
@@ -52,12 +54,27 @@ func NewClientWithConfig(config ClientConfig) (*Client, error) {
 		BaseURL: baseURL,
 	}
 
+	// Handle API Token configuration
 	if config.APIToken == "" {
 		if envAPIToken, set := os.LookupEnv("PINGDOM_API_TOKEN"); set {
 			c.APIToken = envAPIToken
 		}
 	} else {
 		c.APIToken = config.APIToken
+	}
+
+	// Handle API Token Only configuration
+	if config.APITokenOnly == "" {
+		if envAPITokenOnly, set := os.LookupEnv("PINGDOM_API_TOKEN_ONLY"); set {
+			c.APITokenOnly = envAPITokenOnly
+		}
+	} else {
+		c.APITokenOnly = config.APITokenOnly
+	}
+
+	// Ensure at least one authentication method is provided
+	if c.APIToken == "" && c.APITokenOnly == "" {
+		return nil, fmt.Errorf("either API Token or API Token Only must be provided")
 	}
 
 	if config.HTTPClient != nil {
@@ -76,12 +93,20 @@ func NewClientWithConfig(config ClientConfig) (*Client, error) {
 	return c, nil
 }
 
+// addAuthHeaders adds the appropriate authentication headers to the request
+func (pc *Client) addAuthHeaders(req *http.Request) {
+	if pc.APITokenOnly != "" {
+		// Use API Token Only authentication if available
+		req.Header.Add("Authorization", "Bearer "+pc.APITokenOnly)
+	} else if pc.APIToken != "" {
+		// Fall back to primary API Token authentication
+		req.Header.Add("Authorization", "Bearer "+pc.APIToken)
+	}
+}
+
 // NewRequest makes a new HTTP Request.  The method param should be an HTTP method in
 // all caps such as GET, POST, PUT, DELETE.  The rsc param should correspond with
 // a restful resource.  Params can be passed in as a map of strings
-// Usually users of the client can use one of the convenience methods such as
-// ListChecks, etc but this method is provided to allow for making other
-// API calls that might not be built in.
 func (pc *Client) NewRequest(method string, rsc string, params map[string]string) (*http.Request, error) {
 	baseURL, err := url.Parse(pc.BaseURL.String() + rsc)
 	if err != nil {
@@ -97,8 +122,14 @@ func (pc *Client) NewRequest(method string, rsc string, params map[string]string
 	}
 
 	req, err := http.NewRequest(method, baseURL.String(), nil)
-	req.Header.Add("Authorization", "Bearer "+pc.APIToken)
-	return req, err
+	if err != nil {
+		return nil, err
+	}
+	
+	// Add authentication headers
+	pc.addAuthHeaders(req)
+	
+	return req, nil
 }
 
 func (pc *Client) NewRequestMultiParamValue(method string, rsc string, params map[string][]string) (*http.Request, error) {
@@ -118,8 +149,14 @@ func (pc *Client) NewRequestMultiParamValue(method string, rsc string, params ma
 	}
 
 	req, err := http.NewRequest(method, baseURL.String(), nil)
-	req.Header.Add("Authorization", "Bearer "+pc.APIToken)
-	return req, err
+	if err != nil {
+		return nil, err
+	}
+	
+	// Add authentication headers
+	pc.addAuthHeaders(req)
+	
+	return req, nil
 }
 
 // NewJSONRequest makes a new HTTP Request.  The method param should be an HTTP method in
@@ -134,9 +171,15 @@ func (pc *Client) NewJSONRequest(method string, rsc string, params string) (*htt
 	reqBody := strings.NewReader(params)
 
 	req, err := http.NewRequest(method, baseURL.String(), reqBody)
-	req.Header.Add("Authorization", "Bearer "+pc.APIToken)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Add authentication headers
+	pc.addAuthHeaders(req)
 	req.Header.Add("Content-Type", "application/json")
-	return req, err
+	
+	return req, nil
 }
 
 // Do makes an HTTP request and will unmarshal the JSON response in to the

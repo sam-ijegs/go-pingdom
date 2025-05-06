@@ -1,4 +1,4 @@
-module github.com/mbarper/go-pingdom
+module github.com/sam-ijegs/go-pingdom
 
 go 1.19
 
@@ -9,6 +9,5 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/mbarper/go-pingdom v1.4.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 )
