@@ -31,7 +31,6 @@ client, err := pingdom.NewClientWithConfig(pingdom.ClientConfig{
 The library now supports two authentication methods that can be used independently or together:
 When both authentication methods are provided, APITokenOnly takes precedence. At least one authentication method must be provided, or the client initialization will return an error.
 Using a Pingdom client, you can access supported services.
-Using a Pingdom client, you can access supported services.
 
 
 You can override the timeout or other parameters by passing a custom http client:
