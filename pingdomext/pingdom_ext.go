@@ -14,24 +14,28 @@ import (
 const (
 	defaultAuthURL = "https://my.solarwinds.cloud/v1/login"
 	defaultBaseURL = "https://my.pingdom.com"
+	apiURL         = "https://api.pingdom.com/api/3.1" // API URL for token-based auth
 )
 
 // Client represents a client to the Pingdom API.
 type Client struct {
-	JWTToken     string
-	BaseURL      *url.URL
-	client       *http.Client
-	Integrations *IntegrationService
+	JWTToken       string
+	APITokenOnly   string // Renamed from APIToken to APITokenOnly
+	BaseURL        *url.URL
+	client         *http.Client
+	Integrations   *IntegrationService
+	useAPITokenOnly bool // Flag to indicate which auth method to use (renamed)
 }
 
 // ClientConfig represents a configuration for a pingdom client.
 type ClientConfig struct {
-	Username   string
-	Password   string
-	OrgID      string
-	AuthURL    string
-	BaseURL    string
-	HTTPClient *http.Client
+	Username     string
+	Password     string
+	OrgID        string
+	AuthURL      string
+	BaseURL      string
+	HTTPClient   *http.Client
+	APITokenOnly string // Renamed from APIToken
 }
 
 type authPayload struct {
@@ -49,16 +53,25 @@ type authResult struct {
 func NewClientWithConfig(config ClientConfig) (*Client, error) {
 	var baseURL *url.URL
 	var err error
-	var jwtToken *string
-	if config.BaseURL == "" {
-		config.BaseURL = defaultBaseURL
+
+	// Check for API token in configuration or environment
+	apiTokenOnly := config.APITokenOnly
+	if apiTokenOnly == "" {
+		if envAPIToken, set := os.LookupEnv("PINGDOM_API_TOKEN"); set {
+			apiTokenOnly = envAPIToken
+		}
 	}
-	if config.AuthURL == "" {
-		config.AuthURL = defaultAuthURL
+
+	// Initialize client with appropriate base URL
+	if config.BaseURL == "" {
+		if apiTokenOnly != "" {
+			config.BaseURL = apiURL // Use API URL for token auth
+		} else {
+			config.BaseURL = defaultBaseURL // Use default for SolarWinds auth
+		}
 	}
 
 	baseURL, err = url.Parse(config.BaseURL)
-
 	if err != nil {
 		return nil, err
 	}
@@ -67,24 +80,7 @@ func NewClientWithConfig(config ClientConfig) (*Client, error) {
 		BaseURL: baseURL,
 	}
 
-	if config.Username == "" {
-		if envUsername, set := os.LookupEnv("SOLARWINDS_USER"); set {
-			config.Username = envUsername
-		}
-	}
-
-	if config.Password == "" {
-		if envPassword, set := os.LookupEnv("SOLARWINDS_PASSWD"); set {
-			config.Password = envPassword
-		}
-	}
-
-	if config.OrgID == "" {
-		if envOrgID, set := os.LookupEnv("SOLARWINDS_ORG_ID"); set {
-			config.OrgID = envOrgID
-		}
-	}
-
+	// Set HTTP client
 	if config.HTTPClient == nil {
 		config.HTTPClient = &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -92,14 +88,46 @@ func NewClientWithConfig(config ClientConfig) (*Client, error) {
 			},
 		}
 	}
-
 	c.client = config.HTTPClient
-	jwtToken, err = obtainToken(config)
-	if err != nil {
-		return nil, err
-	}
 
-	c.JWTToken = *jwtToken
+	// If API token is provided, use token-based authentication
+	if apiTokenOnly != "" {
+		c.APITokenOnly = apiTokenOnly
+		c.useAPITokenOnly = true
+	} else {
+		// Otherwise, fall back to SolarWinds authentication
+		c.useAPITokenOnly = false
+
+		// Check SolarWinds credentials from config or environment
+		if config.Username == "" {
+			if envUsername, set := os.LookupEnv("SOLARWINDS_USER"); set {
+				config.Username = envUsername
+			}
+		}
+
+		if config.Password == "" {
+			if envPassword, set := os.LookupEnv("SOLARWINDS_PASSWD"); set {
+				config.Password = envPassword
+			}
+		}
+
+		if config.OrgID == "" {
+			if envOrgID, set := os.LookupEnv("SOLARWINDS_ORG_ID"); set {
+				config.OrgID = envOrgID
+			}
+		}
+
+		if config.AuthURL == "" {
+			config.AuthURL = defaultAuthURL
+		}
+
+		// Obtain JWT token using SolarWinds auth
+		jwtToken, err := obtainToken(config)
+		if err != nil {
+			return nil, err
+		}
+		c.JWTToken = *jwtToken
+	}
 
 	c.Integrations = &IntegrationService{client: c}
 
@@ -107,6 +135,7 @@ func NewClientWithConfig(config ClientConfig) (*Client, error) {
 }
 
 func obtainToken(config ClientConfig) (*string, error) {
+	// Existing token obtainment code remains unchanged
 	stateURL, err := url.Parse(config.BaseURL + "/auth/login?")
 	if err != nil {
 		return nil, err
@@ -193,12 +222,7 @@ func obtainToken(config ClientConfig) (*string, error) {
 	return &jwtCookie.Value, err
 }
 
-// NewRequest makes a new HTTP Request.  The method param should be an HTTP method in
-// all caps such as GET, POST, PUT, DELETE.  The rsc param should correspond with
-// a restful resource.  Params can be passed in as a map of strings
-// Usually users of the client can use one of the convenience methods such as
-// ListChecks, etc but this method is provided to allow for making other
-// API calls that might not be built in.
+// NewRequest makes a new HTTP Request.
 func (pc *Client) NewRequest(method string, rsc string, params map[string]string) (*http.Request, error) {
 	baseURL, err := url.Parse(pc.BaseURL.String() + rsc)
 	if err != nil {
@@ -214,16 +238,27 @@ func (pc *Client) NewRequest(method string, rsc string, params map[string]string
 	}
 
 	req, err := http.NewRequest(method, baseURL.String(), nil)
-	req.AddCookie(&http.Cookie{
-		Name:  "jwt",
-		Value: pc.JWTToken,
-	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Use appropriate authentication method
+	if pc.useAPITokenOnly {
+		// Use API token authentication with Bearer token as per Pingdom API 3.1
+		req.Header.Add("Authorization", "Bearer "+pc.APITokenOnly)
+	} else {
+		// Use JWT token authentication
+		req.AddCookie(&http.Cookie{
+			Name:  "jwt",
+			Value: pc.JWTToken,
+		})
+	}
+
 	return req, err
 }
 
 // Do makes an HTTP request and will unmarshal the JSON response in to the
-// passed in interface.  If the HTTP response is outside of the 2xx range the
-// response will be returned along with the error.
+// passed in interface.
 func (pc *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 	resp, err := pc.client.Do(req)
 	if err != nil {
@@ -251,8 +286,6 @@ func decodeResponse(r *http.Response, v interface{}) error {
 }
 
 // Takes an HTTP response and determines whether it was successful.
-// Returns nil if the HTTP status code is within the 2xx range.  Returns
-// an error otherwise.
 func validateResponse(r *http.Response) error {
 	if c := r.StatusCode; 200 <= c && c <= 299 {
 		return nil

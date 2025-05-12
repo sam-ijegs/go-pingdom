@@ -127,6 +127,101 @@ func TestNewClientWithConfig2(t *testing.T) {
 	assert.Nil(t, c)
 }
 
+// Add this test to verify client creation with API token
+func TestNewClientWithAPIToken(t *testing.T) {
+	setup()
+	defer teardown()
+
+	url, err := url.Parse(server.URL)
+	assert.NotEmpty(t, url)
+	assert.NoError(t, err)
+
+	// Test creating client with API token
+	c, err := NewClientWithConfig(ClientConfig{
+		APITokenOnly: "test_api_token",
+		BaseURL:      url.String(),
+		HTTPClient: &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
+	})
+
+	assert.NoError(t, err)
+	assert.Equal(t, "test_api_token", c.APITokenOnly)
+	assert.Equal(t, true, c.useAPITokenOnly)
+	assert.NotNil(t, c.Integrations)
+	assert.Empty(t, c.JWTToken) // Should not have JWT token
+}
+
+// Add this test to verify requests with API token authentication
+func TestClientAPITokenNewRequest(t *testing.T) {
+	setup()
+	defer teardown()
+
+	// Create a client with API token
+	apiClient := &Client{
+		APITokenOnly:    "test_api_token",
+		useAPITokenOnly: true,
+		client: &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
+		Integrations: nil,
+	}
+	apiClient.Integrations = &IntegrationService{client: apiClient}
+
+	url, _ := url.Parse(server.URL)
+	apiClient.BaseURL = url
+
+	// Test creating a request with API token auth
+	req, err := apiClient.NewRequest("GET", "/data/v3/integration", nil)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "GET", req.Method)
+	assert.Equal(t, apiClient.BaseURL.String()+"/data/v3/integration", req.URL.String())
+	
+	// Verify Authorization header contains the Bearer token
+	authHeader := req.Header.Get("Authorization")
+	assert.Equal(t, "Bearer test_api_token", authHeader)
+}
+
+// Add this test to verify backward compatibility with JWT token
+func TestClientJWTTokenNewRequest(t *testing.T) {
+	setup()
+	defer teardown()
+
+	// Create a client with JWT token (old method)
+	jwtClient := &Client{
+		JWTToken:        "test_jwt_token",
+		useAPITokenOnly: false,
+		client: &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
+		Integrations: nil,
+	}
+	jwtClient.Integrations = &IntegrationService{client: jwtClient}
+
+	url, _ := url.Parse(server.URL)
+	jwtClient.BaseURL = url
+
+	// Test creating a request with JWT token auth
+	req, err := jwtClient.NewRequest("GET", "/data/v3/integration", nil)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "GET", req.Method)
+	assert.Equal(t, jwtClient.BaseURL.String()+"/data/v3/integration", req.URL.String())
+	
+	// Verify JWT token is sent as a cookie
+	cookies := req.Cookies()
+	assert.Equal(t, 1, len(cookies))
+	assert.Equal(t, "jwt", cookies[0].Name)
+	assert.Equal(t, "test_jwt_token", cookies[0].Value)
+}
+
 func TestClient_NewRequest(t *testing.T) {
 	setup()
 	defer teardown()
@@ -136,6 +231,15 @@ func TestClient_NewRequest(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "GET", req.Method)
 	assert.Equal(t, client.BaseURL.String()+"/data/v3/integration", req.URL.String())
+	
+	// Verify the request has the JWT cookie and not the Authorization header
+	authHeader := req.Header.Get("Authorization")
+	assert.Empty(t, authHeader)
+	
+	cookies := req.Cookies()
+	assert.Equal(t, 1, len(cookies))
+	assert.Equal(t, "jwt", cookies[0].Name)
+	assert.Equal(t, "my_jwt_token", cookies[0].Value)
 }
 
 func TestClient_Do(t *testing.T) {
